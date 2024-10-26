@@ -2,21 +2,21 @@
 
 pragma solidity ^0.8.0;
 
-contract SC_A {
-    event Deposit(bytes32 indexed si, bytes32 indexed vi);
-    uint256 public constant p = 730750818665451621361119245571504901405976559617;
+contract ChallGen {
+    event Deposit(uint[] si, uint[] vi);
 
-    function ChalGen(uint256 timestamp, uint256 difficulty, address coinbase) public {
-        bytes32 raw_si = keccak256(abi.encodePacked(timestamp, difficulty, block.number));
-        uint256 si = uint256(raw_si) % p;
-        if (si == 0) {
-            si = 1;
+    function ChallGen(uint c) public returns (uint[] memory, uint[] memory) {
+        uint[] memory si = new uint[](c);
+        uint[] memory vi = new uint[](c);
+
+        for (uint i = 0; i < c; i++) {
+            si[i] = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, block.number)));
+
+            vi[i] = uint(keccak256(abi.encodePacked(si[i], block.coinbase, msg.sender)));
         }
-        bytes32 raw_vi = keccak256(abi.encodePacked(si, coinbase, msg.sender));
-        uint256 vi = uint256(raw_vi) % p;
-        if (vi == 0) {
-            vi = 1;
-        }
-        emit Deposit(bytes32(si), bytes32(vi));
+
+        emit Deposit(si, vi);
+
+        return (si, vi);
     }
 }
